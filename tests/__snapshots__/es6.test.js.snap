@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loads goog modules with es6 import 1`] = `
+"This should contain the empty submodule: { value: 'This is a module', submodule: {} }
+Call via default export:
+this is some.legacy.namespace.myFn
+some.legacy.namespace.otherModule.text = This is from otherModule.
+Call via named export:
+this is some.legacy.namespace.myFn
+some.legacy.namespace.otherModule.text = This is from otherModule.
+Some var: 42"
+`;

@@ -1,0 +1,6 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loads closure library modules with require() 1`] = `
+"Inner box in outer box true
+Outer box in inner box false"
+`;
