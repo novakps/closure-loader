@@ -1,19 +1,19 @@
-# Closure library dependency loader for [Webpack](http://webpack.github.io/)
+# closure-loader
 
-[![Join the chat at https://gitter.im/eXaminator/closure-loader](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/eXaminator/closure-loader?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Dependency Status](https://david-dm.org/examinator/closure-loader.svg)](https://david-dm.org/examinator/closure-loader)
-[![npm version](https://badge.fury.io/js/closure-loader.svg)](https://badge.fury.io/js/closure-loader)
+[![npm][npm]][npm-url]
+[![deps][deps]][deps-url]
+[![test][test]][test-url]
 
-This is a webpack loader which resolves `goog.provide()` and `goog.require()` statements in webpack
-just like if they were regular CommonJS modules.
+This is a Webpack loader which resolves `goog.provide()` and `goog.require()` statements in Webpack
+as if they were regular CommonJS modules.
 
 ## Installation
 ```npm install --save-dev closure-loader```
 
 ## Usage
-[Documentation: Using loaders](http://webpack.github.io/docs/using-loaders.html)
+[Documentation: Using loaders](https://webpack.js.org/concepts/loaders/#using-loaders)
 
-**NOTE**: This loader is mainly meant for building (probably older) closure library projects with webpack
+**NOTE**: This loader is mainly meant for building (probably older) Closure Compiler projects with Webpack
 and to make a transition to other module systems (CommonJS or ES6) easier.
 
 There are two parts to this loader:
@@ -26,13 +26,13 @@ There are two parts to this loader:
     - It assigns the value of the namespace from the provide file and assign it to the same
       namespace in the current module
 
-In the simplest way you can just use those two statements like you usually would with the google closure library.
+In the simplest way you can just use those two statements like you usually would with Google Closure Tools.
 
-**NOTE**: Usually the closure lib simply creates all namespaces on the **global** scope (i.e. the window object).
+**NOTE**: Usually the Closure compiler simply creates all namespaces on the **global** scope (i.e. the window object).
 This is **not** the case if you use this loader. Every file ("module") has its own scope just like it would have
 if you used CommonJS syntax.
 
-You can use closure library dependencies in conjunction with CommonJS syntax. You can load any module that uses
+You can use Closure dependencies in conjunction with CommonJS syntax. You can load any module that uses
 `goog.provide()` with `require()`, but not the other way round.
 
 ```javascript
@@ -72,7 +72,7 @@ module(); // will output 'my module was loaded' to the console
 ```
 
 ## Configuration
-Here is an example webpack config for this loader:
+Here is an example Webpack config for this loader:
 
 ```javascript
 module.exports = {
@@ -84,23 +84,22 @@ module.exports = {
         filename: '[name].js'
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\/src\/.*\.js$/,
-                loaders: [
-                    'closure-loader'
-                ],
+                loader: 'closure-loader',
+                options: {
+                    paths: [
+                        __dirname + '/src',
+                    ],
+                    es6mode: true,
+                    watch: true,
+                    fileExt: '.js',
+                },
                 exclude: [/node_modules/, /test/]
             }
         ]
     },
-    closureLoader: {
-        paths: [
-            __dirname + '/src'
-        ],
-        es6mode: true,
-        watch: true
-    }
 };
 ```
 
@@ -116,31 +115,46 @@ Here are the configuration options specific for this loader:
   changes in the mapped files. This is neccesary to be able to delete the internal map cache. But
   it also makes problems with CI sytstems and build scripts, because the watcher will prevent the
   process from beeing exited.
+- **fileExt** (string, default: '.js'): Files extension which will be searched for dependency resolving. 
+  Support [glob](https://github.com/isaacs/node-glob) pattern syntax.
 
-## Examples
-In the hopes of clarifying the usage of the loader a bit I have provided a couple of examples which
-you can find in the `examples` directory.
+**NOTE**: This loader in no way includes or wraps the actual Google Closure Library. If you want to use the Closure Library you will have to include it yourself and ensure correct shimming:
 
-To run an example please follow these steps:
-- `npm install` in the closure-loader root directory
-- `npm install` in the directory of the example
-- `npm start` or `npm run build` in the directory of the example
+```javascript
+module: {
+    rules: [
+        {
+            test: /google-closure-library\/closure\/goog\/base/,
+            use: [
+                'imports-loader?this=>{goog:{}}&goog=>this.goog',
+                'exports-loader?goog',
+            ],
+        },
+    ],
+},
+plugins: [
+    new webpack.ProvidePlugin({
+        goog: 'google-closure-library/closure/goog/base',
+    }),
+]
+```
 
-The following examples are available:
-- **common-js**: This example shows how to load some legacy code that contains `goog.provide()` and
-  `goog.require()` via commonJs `require()` calls.
-- **common-js-closure-lib**: This example shows how to load the closure library via commonJs
-  `require()` calls.
-- **es6**: This example shows how to load some legacy code that contains `goog.provide()` and
-  `goog.require()` via babel and es6 `import` calls.
-- **es6-closure-lib**: This example shows how to load the closure library via babel and es6
-  `import` calls.
-- **legacy-closure-lib**: This example shows how to load the closure library via your own `goog.require()`
-  calls. This is not advised. If you are using webpack you should think about using a proper module loader,
-  preferably es6 as this is now the standard.
+## Authors
 
-**NOTE**: This loader does in no way include or wrap the actual google closure library. If you want to use the closure library you will have to include it yourself and ensure correct shimming. See the above examples on how this can be done.
+* **Steven Weingärtner** - *Original author & maintainer* - [eXaminator](https://github.com/eXaminator)
+* **Matt Mulder** - *Current maintainer* - [mxmul](https://github.com/mxmul)
+
+See also the list of [contributors](https://github.com/mxmul/closure-loader/graphs/contributors) who participated in this project.
 
 ## License
 
 MIT (http://www.opensource.org/licenses/mit-license.php)
+
+[npm]: https://img.shields.io/npm/v/closure-loader.svg
+[npm-url]: https://npmjs.com/package/closure-loader
+
+[deps]: https://david-dm.org/mxmul/closure-loader.svg
+[deps-url]: https://david-dm.org/mxmul/closure-loader
+
+[test]: http://img.shields.io/travis/mxmul/closure-loader/master.svg
+[test-url]: https://travis-ci.org/mxmul/closure-loader
